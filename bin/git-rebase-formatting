@@ -24,10 +24,6 @@
 #   recovery from mistakes in the script.
 # - You are running a reasonably recent version of BASH.
 #   This was written against 4.4.23 on OSX.
-# - If using sbt-client, the version of the scalafmt plugin loaded into your
-#   sbt driver agrees with the version specified in `format_hash`
-# - You _must_ have your branch up-to-date with the commit immediately before
-#   `format_hash` for the greatest chance of success.
 # - You _must not_ have upgraded to the latest scalafmt and reformatted the
 #   codebase already. If you've done that, you can run this script from the
 #   detached head immediately before doing the format, then likely simply
