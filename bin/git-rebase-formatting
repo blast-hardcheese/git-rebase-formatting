@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# rebase-formatting.sh
+# git rebase-formatting
 #
 # The whole point of this script is to distribute formatting changes evenly
 # across your branch, without frivolous merge conflicts. It does this by
@@ -44,10 +44,43 @@
 # as running scalafmt in a warm sbt session only takes a few seconds, vs 20+
 # seconds on my machine starting cold.
 
-format_cmd='bash ../format.sh'
-targets='modules'
-targets='-a'
+format_cmd=
+target=
 
+do_help() {
+  echo "Usage: $(basename "$0") [-h|--help] -c 'format command' [common_root] branch -- [target [target [...]]]"
+  exit 1
+}
+
+while [[ ! -z "$1" ]]; do
+  case "$1" in
+    "--help"|"-h")
+      do_help
+      ;;
+    "-c")
+      shift
+      format_cmd="$1"
+      ;;
+    --)
+      target="$1"
+      break
+      ;;
+    *)
+      echo "$(basename "$0"): Unknown argument: $@"
+      do_help
+  esac
+  shift
+done
+
+if [ -z "$target" ]; then
+  target="-a"
+fi
+
+if [ -z "$format_cmd" ]; then
+  echo "Error: Missing format command" >&2
+  do_help
+  exit 1
+fi
 
 # We use this marker to indicate which commits we should act on. It's somewhat
 # unlikely that it'll conflict. Tested against BSD and GNU `base64`
@@ -102,7 +135,7 @@ echo git rebase "${common_root}" "${current_hash}" --onto @
 read -p '[Enter] '
 
 git rebase "${common_root}" "${current_hash}" --onto @ \
-  -x "set -x; ${format_cmd} && git commit -m '${marker} @^ formatting' ${targets} --allow-empty && git revert --no-edit -n @ && git commit -m '${marker} @v reverting' --allow-empty; set +x"
+  -x "set -x; ${format_cmd} && git commit -m '${marker} @^ formatting' ${target} --allow-empty && git revert --no-edit -n @ && git commit -m '${marker} @v reverting' --allow-empty; set +x"
 
 # The very last commit may include just a lone revert of formatting changes.
 # It must be stopped.
