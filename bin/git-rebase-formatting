@@ -66,8 +66,17 @@ while [[ ! -z "$1" ]]; do
       break
       ;;
     *)
-      echo "$(basename "$0"): Unknown argument: $@"
-      do_help
+      if [ -z "$common_root" ]; then
+        shift
+        branch_tip="$1"
+      elif [ -z "$common_root" ]; then
+        shift
+        common_root="$branch_tip"
+        branch_tip="$1"
+      else
+        echo "$(basename "$0"): Unknown argument: $@"
+        do_help
+      fi
   esac
   shift
 done
@@ -85,22 +94,6 @@ fi
 # We use this marker to indicate which commits we should act on. It's somewhat
 # unlikely that it'll conflict. Tested against BSD and GNU `base64`
 marker="$(echo "${RANDOM}" | base64)"
-
-if [[ "${#@}" -eq 1 ]]; then
-  branch_tip="$1"
-  common_root="$(git rev-parse origin/master 2>/dev/null)"
-  if [ $? -ne 0 ]; then
-    common_root="$(git rev-parse upstream/master 2>/dev/null)"
-  fi
-  format_hash=
-elif [[ "${#@}" -eq 2 ]]; then
-  common_root="$1"
-  branch_tip="$2"
-  format_hash=
-else
-  echo "Usage: ${0} [<common_root> [<format_hash>]]" >&2
-  exit 2
-fi
 
 if [ ! -z "$branch_tip" ]; then
   git checkout "$branch_tip"
