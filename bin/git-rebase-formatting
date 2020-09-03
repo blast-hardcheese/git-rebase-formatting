@@ -41,7 +41,7 @@
 # seconds on my machine starting cold.
 
 format_cmd=
-target=
+targets=()
 
 do_help() {
   echo "Usage: $(basename "$0") [-h|--help] -c 'format command' [common_root] branch -- [target [target [...]]]"
@@ -58,7 +58,7 @@ while [[ ! -z "$1" ]]; do
       format_cmd="$1"
       ;;
     --)
-      target="$1"
+      targets=( "$@" )
       break
       ;;
     *)
@@ -77,8 +77,8 @@ while [[ ! -z "$1" ]]; do
   shift
 done
 
-if [ -z "$target" ]; then
-  target="-a"
+if [ "${#targets[@]}" -eq 0 ]; then
+  targets=( -a )
 fi
 
 if [ -z "$format_cmd" ]; then
@@ -113,7 +113,7 @@ echo git rebase "${common_root}" "${current_hash}" --onto @
 read -p '[Enter] '
 
 git rebase "${common_root}" "${current_hash}" --onto @ \
-  -x "set -x; ${format_cmd} && git commit -m '${marker} @^ formatting' ${target} --allow-empty && git revert --no-edit -n @ && git commit -m '${marker} @v reverting' --allow-empty; set +x"
+  -x "set -x; ${format_cmd} && git commit -m '${marker} @^ formatting' ${targets[@]@Q} --allow-empty && git reset --hard && git revert --no-edit -n @ && git commit -m '${marker} @v reverting' --allow-empty; set +x"
 
 # The very last commit may include just a lone revert of formatting changes.
 # It must be stopped.
