@@ -62,7 +62,7 @@ while [[ ! -z "$1" ]]; do
       break
       ;;
     *)
-      if [ -z "$common_root" ]; then
+      if [ -z "$branch_tip" ]; then
         branch_tip="$1"
       elif [ -z "$common_root" ]; then
         common_root="$branch_tip"
