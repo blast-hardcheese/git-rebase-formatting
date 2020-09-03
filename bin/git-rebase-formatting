@@ -63,16 +63,15 @@ while [[ ! -z "$1" ]]; do
       ;;
     *)
       if [ -z "$common_root" ]; then
-        shift
         branch_tip="$1"
       elif [ -z "$common_root" ]; then
-        shift
         common_root="$branch_tip"
         branch_tip="$1"
       else
         echo "$(basename "$0"): Unknown argument: $@"
         do_help
       fi
+      ;;
   esac
   shift
 done
